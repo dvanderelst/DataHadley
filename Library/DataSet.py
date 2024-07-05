@@ -22,10 +22,15 @@ class DataSet:
         fl.close()
         self.data = data
 
-    def plot_measurement(self, index, ear=0, type='raw'):
-        data, _, _ = self.get_measurement(index, ear, type)
+    def plot_measurement(self, index, type='decibel'):
+        data0, _, _ = self.get_measurement(index, 0, type)
+        data1, indices, position = self.get_measurement(index, 1, type)
         distance = self.distance_axis
-        plt.plot(distance, data, label=self.filename)
+        title = str(indices) + str(position)
+        plt.plot(distance, data0, label='ear 0')
+        plt.plot(distance, data1, label='ear 1')
+        plt.legend(loc='upper right')
+        plt.title(title)
         plt.xlabel('Distance, cm')
 
     def get_measurement(self, index, ear=0, type='raw'):
