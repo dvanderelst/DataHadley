@@ -8,9 +8,9 @@ start_index = 45
 end_index = 90
 
 subfolder = '1pole_single_position'
-plain_files = ['plain-pole.pck']
-single_felt_files = ['1x-felt-pole.pck']
-double_felt_files = ['2x-felt-pole.pck']
+plain_files = ['single-pole-no-felt-1.pck', 'single-pole-no-felt-2.pck', 'single-pole-no-felt-3.pck']
+single_felt_files = ['single-pole-1x-felt-1.pck', 'single-pole-1x-felt-2.pck', 'single-pole-1x-felt-3.pck']
+double_felt_files = ['single-pole-2x-felt-1.pck','single-pole-2x-felt-2.pck', 'single-pole-2x-felt-3.pck']
 
 # subfolder = '3poles_single_position'
 # plain_files = ['3-no-felt-poles.pck']
@@ -111,5 +111,6 @@ pyplot.plot(diff1_0, 'g-', alpha=0.5, label='1x felt, left')
 pyplot.plot(diff2_0, 'g--', alpha=0.5, label='2x felt, left')
 pyplot.plot(diff1_1, 'r-', alpha=0.5, label='1x felt, right')
 pyplot.plot(diff2_1, 'r--', alpha=0.5, label='2x felt, right')
+pyplot.title('Plain minus felted')
 pyplot.legend()
 pyplot.show()
