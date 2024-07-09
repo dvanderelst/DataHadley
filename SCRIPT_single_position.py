@@ -1,4 +1,5 @@
 from Library import Process
+from Library import Utils
 from matplotlib import pyplot
 import numpy as np
 from os import path
@@ -7,15 +8,20 @@ import pickle
 start_index = 45
 end_index = 90
 
-subfolder = '1pole_single_position'
-plain_files = ['single-pole-no-felt-1.pck', 'single-pole-no-felt-2.pck', 'single-pole-no-felt-3.pck']
-single_felt_files = ['single-pole-1x-felt-1.pck', 'single-pole-1x-felt-2.pck', 'single-pole-1x-felt-3.pck']
-double_felt_files = ['single-pole-2x-felt-1.pck','single-pole-2x-felt-2.pck', 'single-pole-2x-felt-3.pck']
+plain_color = 'red'
+felt_color = 'blue'
+double_felt_color = 'green'
 
-# subfolder = '3poles_single_position'
-# plain_files = ['3-no-felt-poles.pck']
-# single_felt_files = ['3-felt-poles.pck']
-# double_felt_files = ['3-2x-felt-poles.pck']
+# subfolder = '1pole_single_position'
+# plain_files = ['single-pole-no-felt-1.pck', 'single-pole-no-felt-2.pck', 'single-pole-no-felt-3.pck']
+# single_felt_files = ['single-pole-1x-felt-1.pck', 'single-pole-1x-felt-2.pck', 'single-pole-1x-felt-3.pck']
+# double_felt_files = ['single-pole-2x-felt-1.pck','single-pole-2x-felt-2.pck', 'single-pole-2x-felt-3.pck']
+
+subfolder = '3poles_single_position'
+full_folder = path.join('data', subfolder)
+plain_files = Utils.get_files(full_folder, 'combination-no-felt*')
+single_felt_files = Utils.get_files(full_folder, 'combination-1x-felt*')
+double_felt_files = Utils.get_files(full_folder, 'combination-2x-felt*')
 
 all_files = [plain_files, single_felt_files, double_felt_files]
 overall_max = 0
@@ -30,7 +36,7 @@ condition_means = []
 for condition_index, condition in enumerate(all_files):
     current_scaled = []
     for file_index, file_name in enumerate(condition):
-        full_filename = path.join('data',subfolder, file_name)
+        full_filename = path.join('data', subfolder, file_name)
         fl = open(full_filename, 'rb')
         data = pickle.load(fl)
         fl.close()
@@ -76,41 +82,49 @@ pyplot.show()
 condition_means = np.array(condition_means)
 print(overall_min, overall_max)
 
-#%%
+# %%
+colors = [plain_color, felt_color, double_felt_color]
+time_axis = Utils.time_axis()
+selected_time_axis = time_axis[start_index:end_index]
 
-pyplot.figure()
+pyplot.figure(figsize=(8, 3))
 pyplot.subplot(1, 2, 1)
 selected0 = condition_means[:, :, 0]
-selected0 = selected0.transpose()
-pole_data = selected0[start_index:end_index, :].copy()
-pole_data[pole_data <= (-dynamic_range+1)] = np.nan
-pole_data = np.nanmean(pole_data, axis=0)
-print(pole_data)
-pyplot.plot(selected0)
-pyplot.legend(['plain', 'single', 'double'])
+pyplot.plot(time_axis, selected0[0, :], color=colors[0])
+pyplot.plot(time_axis, selected0[1, :], color=colors[1])
+pyplot.plot(time_axis, selected0[2, :], color=colors[2])
+pyplot.grid()
+pyplot.xlabel('Time [ms]')
+pyplot.ylabel('Amplitude [dB]')
+pyplot.legend(['Plain', 'Single Felt', 'Double Felt'], loc='lower right')
 
 pyplot.subplot(1, 2, 2)
 selected1 = condition_means[:, :, 1]
-selected1 = selected1.transpose()
-pole_data = selected1[start_index:end_index, :].copy()
-pole_data[pole_data <= (-dynamic_range+1)] = np.nan
-pole_data = np.nanmean(pole_data, axis=0)
-print(pole_data)
-pyplot.plot(selected1)
+pyplot.plot(time_axis, selected1[0, :], color=colors[0])
+pyplot.plot(time_axis, selected1[1, :], color=colors[1])
+pyplot.plot(time_axis, selected1[2, :], color=colors[2])
+pyplot.grid()
+pyplot.xlabel('Time [ms]')
+pyplot.ylabel('Amplitude [dB]')
+pyplot.legend(['Plain', 'Single Felt', 'Double Felt'], loc='lower right')
+
+pyplot.tight_layout()
 pyplot.show()
 
+diff1_0 = selected0[0, start_index:end_index] - selected0[1, start_index:end_index]
+diff2_0 = selected0[0, start_index:end_index] - selected0[2, start_index:end_index]
 
-diff1_0 = selected0[start_index:end_index, 0] - selected0[start_index:end_index, 1]
-diff2_0 = selected0[start_index:end_index, 0] - selected0[start_index:end_index, 2]
-
-diff1_1 = selected1[start_index:end_index, 0] - selected1[start_index:end_index, 1]
-diff2_1 = selected1[start_index:end_index, 0] - selected1[start_index:end_index, 2]
+diff1_1 = selected1[0, start_index:end_index] - selected1[1, start_index:end_index]
+diff2_1 = selected1[0, start_index:end_index] - selected1[2, start_index:end_index]
 
 pyplot.figure()
-pyplot.plot(diff1_0, 'g-', alpha=0.5, label='1x felt, left')
-pyplot.plot(diff2_0, 'g--', alpha=0.5, label='2x felt, left')
-pyplot.plot(diff1_1, 'r-', alpha=0.5, label='1x felt, right')
-pyplot.plot(diff2_1, 'r--', alpha=0.5, label='2x felt, right')
+pyplot.plot(selected_time_axis, diff1_0, '-', color=colors[1], alpha=0.5, label='1x felt, left')
+pyplot.plot(selected_time_axis, diff2_0, '--', color=colors[1], alpha=0.5, label='2x felt, left')
+pyplot.plot(selected_time_axis, diff1_1, '-', color=colors[2], alpha=0.5, label='1x felt, right')
+pyplot.plot(selected_time_axis, diff2_1, '--', color=colors[2], alpha=0.5, label='2x felt, right')
 pyplot.title('Plain minus felted')
+pyplot.grid()
+pyplot.xlabel('Time [ms]')
+pyplot.ylabel('Amplitude [dB]')
 pyplot.legend()
 pyplot.show()
