@@ -14,6 +14,7 @@ class DataSet:
         self.min_value = 45
         self.max_value = 2900
         self.read_file(filename)
+        self.subtraction_set = False
 
     def read_file(self, filename):
         full_name = path.join('data', filename)
@@ -32,6 +33,8 @@ class DataSet:
         plt.legend(loc='upper right')
         plt.title(title)
         plt.xlabel('Distance, cm')
+        plt.ylabel('Amplitude, dB')
+        plt.grid()
 
     def get_measurement(self, index, ear=0, type='raw'):
         if type.startswith('r'): selected_data = self.raw_data
@@ -82,6 +85,10 @@ class DataSet:
     def raw_data(self):
         data = self.data['data_array']
         data = np.mean(data, axis=3)
+        if self.subtraction_set:
+            subtraction_data = self.subtraction_set.raw_data
+            data = data - subtraction_data
+            data[data <0] = 0
         return data
 
     @property
